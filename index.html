@@ -11,24 +11,79 @@
      <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
      <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
      <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!--  Milestone -->
 
      <script type="text/babel">
         const { useState } = React; //non lo importiamo ma lo destrutturalizziamo
         const animalsChoices = ["Cane", "Gatto", "Pappagallo", "Cavallo", "Panda"];
     
 
+        function Modal({
+            title, 
+            content, 
+            show = false, 
+            onClose = () => {},
+            onConfirm = () => {}
+            }){
+            return show && ReactDOM.createPortal(
+                
+                <div className="modal-container">
+                    <div className="modal">
+                        <h2>{title}</h2>
+                        {content}
+                        <button onClick={onClose}>Annulla</button>
+                        <button onClick={onConfirm}>Conferma</button>
+                    </div>
+                </div>,
+                document.body
+            )
+          }
+
+          function AnimalInput({ value, onChange }) {
+            return (
+                <input 
+                type="text"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="Inserisci il nome dell'animale"
+                />
+            );
+        }
+
         const ReactApp = () => {
-             const [animals, setAnimals] = useState([]);
+            const [animals, setAnimals] = useState([]);
+            const [showModal, setShowModal] = useState(false); 
+            const [newAnimal, setNewAnimal] = useState(''); 
 
             const addRandomAnimal = () => {
                 const randomAnimal = animalsChoices[Math.floor(Math.random() * 5)];
                 setAnimals([...animals, randomAnimal]);
             };
+
+            const handleConfirm = () => {
+                if (newAnimal.trim()) {
+                    setAnimals([...animals, newAnimal]);
+                    setNewAnimal('');
+                    setShowModal(false);
+                }
+            };
             
             return (
                 <>
-                <button onClick={addRandomAnimal}>Aggiungi Animale</button>
+                <button onClick={() => setShowModal(true)}>Aggiungi Animale</button>
+
+                <Modal 
+                    title="Aggiungi nuovo animale"
+                    content={
+                        <AnimalInput 
+                            value={newAnimal}
+                            onChange={setNewAnimal}
+                        />
+                    }
+                    show={showModal}
+                    onClose={() => setShowModal(false)}
+                    onConfirm={handleConfirm}
+                />
+
                 <details>
                     <summary>Animali</summary>
                     <div>
